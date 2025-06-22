@@ -1,6 +1,7 @@
-FROM node:18-alpine
+FROM node:18
 WORKDIR /app
-COPY dist .
+COPY . .
+RUN npm install && npm run build
 RUN npm install -g serve
-EXPOSE 5173
-CMD ["serve", "-s", ".", "-l", "5173"]
+EXPOSE $PORT
+CMD ["serve", "-s", "dist", "-l", "$PORT"]
