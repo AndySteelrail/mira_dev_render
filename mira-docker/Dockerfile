@@ -16,7 +16,13 @@ RUN sed -i "s/listen 80/listen \$PORT/g" /etc/nginx/sites-available/default
 RUN nginx -t
 
 RUN echo $'#!/usr/bin/env bash\n\
+\n# Отладочный вывод\n\
+echo "Database connection string: $Database__ConnectionString"\n\
+\n# Подставляем строку подключения\n\
 sed -i "s|ConnectionString.*|ConnectionString\": \"$Database__ConnectionString\",|g" appsettings.json\n\
+\n# Проверяем результат замены\n\
+cat appsettings.json\n\
+\n# Запускаем сервисы\n\
 service nginx start &\n\
 dotnet Mira.dll' > /start.sh && chmod +x /start.sh
 
