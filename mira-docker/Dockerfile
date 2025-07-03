@@ -13,12 +13,11 @@ COPY mira-docker/frontend/dist /var/www/html
 COPY mira-docker/nginx/nginx.conf /etc/nginx/sites-available/default
 
 RUN sed -i "s/listen 80/listen \$PORT/g" /etc/nginx/sites-available/default
-
 RUN nginx -t
 
-RUN echo $'#!/bin/bash\n\
-service nginx start\n\
+RUN echo $'#!/usr/bin/env bash\n\
+sed -i "s|ConnectionString.*|ConnectionString\": \"$Database__ConnectionString\",|g" appsettings.json\n\
+service nginx start &\n\
 dotnet Mira.dll' > /start.sh && chmod +x /start.sh
 
-EXPOSE 5000
 CMD ["/bin/bash", "/start.sh"]
