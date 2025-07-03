@@ -1,18 +1,24 @@
-﻿FROM nginx:alpine
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 
-RUN apk add --no-cache libstdc++ postgresql-client icu-libs dotnet8-runtime
+RUN apt-get update && \
+    apt-get install -y nginx postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY mira-docker/frontend/dist /usr/share/nginx/html
+WORKDIR /app
 
-COPY mira-docker/backend /app/backend
-WORKDIR /app/backend
+COPY mira-docker/backend ./
 
-COPY mira-docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+RUN mkdir -p /var/www/html
+COPY mira-docker/frontend/dist /var/www/html
+COPY mira-docker/nginx/nginx.conf /etc/nginx/sites-available/default
 
-RUN sed -i "s/listen 80;/listen \$PORT;/g" /etc/nginx/conf.d/default.conf
+RUN sed -i "s/listen 80/listen \$PORT/g" /etc/nginx/sites-available/default
 
-RUN echo $'#!/bin/sh\n\
-dotnet Mira.dll &\n\
-nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
+RUN nginx -t
 
-CMD ["/bin/sh", "/start.sh"]
+RUN echo $'#!/bin/bash\n\
+service nginx start\n\
+dotnet Mira.dll' > /start.sh && chmod +x /start.sh
+
+EXPOSE 5000
+CMD ["/bin/bash", "/start.sh"]
