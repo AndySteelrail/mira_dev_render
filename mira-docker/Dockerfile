@@ -1,6 +1,6 @@
 ﻿FROM nginx:alpine
 
-RUN apk add --no-cache libstdc++ postgresql-client icu-libs dotnet-runtime8.0
+RUN apk add --no-cache libstdc++ postgresql-client icu-libs dotnet8-runtime
 
 COPY mira-docker/frontend/dist /usr/share/nginx/html
 
